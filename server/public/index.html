@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Drum AR HUD – Menu</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 2rem;
+      background-color: #f7f7f7;
+    }
+    h1 {
+      margin-top: 0;
+    }
+    .projects {
+      margin-bottom: 1rem;
+    }
+    .project {
+      display: inline-block;
+      margin: 0.25rem;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      background-color: #e0e0e0;
+      cursor: pointer;
+    }
+    .project.active {
+      background-color: #4caf50;
+      color: white;
+    }
+    #playBtn {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 4px;
+      background-color: #2196f3;
+      color: white;
+      cursor: pointer;
+    }
+    #stateBox {
+      margin-top: 1rem;
+      padding: 0.5rem;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      white-space: pre-wrap;
+      font-family: monospace;
+    }
+    #error {
+      color: #d32f2f;
+    }
+  </style>
+</head>
+<body>
+  <h1>Drum AR HUD</h1>
+  <p>Selecione uma música abaixo e clique <strong>Tocar</strong> para habilitar o servidor.</p>
+  <div class="projects" id="projectList"></div>
+  <button id="playBtn" disabled>Tocar</button>
+  <div id="error"></div>
+  <div id="stateBox"></div>
+  <script>
+    const projectList = document.getElementById('projectList');
+    const playBtn = document.getElementById('playBtn');
+    const stateBox = document.getElementById('stateBox');
+    const errorBox = document.getElementById('error');
+    let selectedProjectId = null;
+    let ws;
+
+    async function fetchProjects() {
+      try {
+        const res = await fetch('/api/projects');
+        if (!res.ok) throw new Error('Falha ao carregar projetos');
+        const projects = await res.json();
+        projectList.innerHTML = '';
+        projects.forEach(proj => {
+          const btn = document.createElement('span');
+          btn.className = 'project';
+          btn.textContent = proj.song + (proj.artist ? ' – ' + proj.artist : '');
+          btn.dataset.id = proj.id;
+          btn.addEventListener('click', () => selectProject(proj.id, btn));
+          projectList.appendChild(btn);
+        });
+      } catch (err) {
+        errorBox.textContent = err.message;
+      }
+    }
+
+    async function selectProject(id, element) {
+      try {
+        errorBox.textContent = '';
+        const res = await fetch('/api/select', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ projectId: id })
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({ error: 'Erro desconhecido' }));
+          throw new Error(data.error || 'Erro ao selecionar projeto');
+        }
+        selectedProjectId = id;
+        // update UI
+        document.querySelectorAll('.project').forEach(el => el.classList.toggle('active', el === element));
+        playBtn.disabled = false;
+      } catch (err) {
+        errorBox.textContent = err.message;
+      }
+    }
+
+    async function play() {
+      try {
+        errorBox.textContent = '';
+        // set playing true and reset bar/beat if necessary
+        const res = await fetch('/api/state', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ playing: true, bar: 1, beat: 1, ppq: 0 })
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({ error: 'Erro desconhecido' }));
+          throw new Error(data.error || 'Erro ao iniciar');
+        }
+      } catch (err) {
+        errorBox.textContent = err.message;
+      }
+    }
+
+    function setupWebSocket() {
+      if (ws) ws.close();
+      const protocol = location.protocol === 'https:' ? 'wss' : 'ws';
+      const url = `${protocol}://${location.host}/ws/state`;
+      ws = new WebSocket(url);
+      ws.onopen = () => {
+        // console.log('WebSocket conectado');
+      };
+      ws.onmessage = (evt) => {
+        try {
+          const state = JSON.parse(evt.data);
+          stateBox.textContent = JSON.stringify(state, null, 2);
+        } catch (e) {
+          // ignore parse errors
+        }
+      };
+      ws.onclose = () => {
+        // tentar reconectar após um tempo
+        setTimeout(setupWebSocket, 2000);
+      };
+    }
+
+    playBtn.addEventListener('click', play);
+    fetchProjects();
+    setupWebSocket();
+  </script>
+</body>
+</html>
