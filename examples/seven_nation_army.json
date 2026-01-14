@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "meta": {
+    "name": "Seven Nation Army",
+    "artist": "The White Stripes",
+    "bpm": 124,
+    "timeSig": "4/4"
+  },
+  "kit": [
+    {"id": "crash", "name": "Crash", "midiNote": 49, "member": "RH"},
+    {"id": "hihat", "name": "Hi-Hat", "midiNote": 42, "member": "RF"},
+    {"id": "snare", "name": "Snare", "midiNote": 38, "member": "LH"},
+    {"id": "floor", "name": "Floor Tom", "midiNote": 43, "member": "LH"},
+    {"id": "kick", "name": "Kick", "midiNote": 36, "member": "RF"}
+  ],
+  "colors": {
+    "RH": "#0000FF",
+    "LH": "#FF0000",
+    "RF": "#00FF00",
+    "LF": "#FFA500",
+    "BOTH": "#800080"
+  },
+  "environment": {},
+  "grooves": [
+    {
+      "id": "groove1",
+      "bars": 1,
+      "grid": "1/4",
+      "events": [
+        {"instrument": "hihat", "step": 0, "hit": "x"},
+        {"instrument": "hihat", "step": 1, "hit": "x"},
+        {"instrument": "hihat", "step": 2, "hit": "x"},
+        {"instrument": "hihat", "step": 3, "hit": "x"},
+        {"instrument": "snare", "step": 1, "hit": "o"},
+        {"instrument": "floor", "step": 2, "hit": "o"},
+        {"instrument": "kick", "step": 0, "hit": "o"},
+        {"instrument": "kick", "step": 2, "hit": "o"}
+      ]
+    }
+  ],
+  "arrangement": [
+    {
+      "groove": "groove1",
+      "repeat": 4,
+      "label": "Intro",
+      "notes": "Simplified intro groove repeated 4 bars"
+    }
+  ]
+}
