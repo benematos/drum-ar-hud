@@ -1,0 +1,99 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "integer" },
+    "meta": {
+      "type": "object",
+      "properties": {
+        "song": { "type": "string" },
+        "artist": { "type": "string" },
+        "bpm": { "type": "number" },
+        "timeSig": { "type": "string" }
+      },
+      "required": ["song","artist","bpm","timeSig"],
+      "additionalProperties": false
+    },
+    "kit": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "instruments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "midiNote": { "type": "integer" },
+              "member": {
+                "type": "string",
+                "enum": ["RH","LH","RF","LF","both"]
+              }
+            },
+            "required": ["id","name","member"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["name","instruments"],
+      "additionalProperties": false
+    },
+    "colors": {
+      "type": "object",
+      "properties": {
+        "RH": { "type": "string" },
+        "LH": { "type": "string" },
+        "RF": { "type": "string" },
+        "LF": { "type": "string" },
+        "both": { "type": "string" }
+      },
+      "required": ["RH","LH","RF","LF","both"],
+      "additionalProperties": false
+    },
+    "environment": { "type": "object" },
+    "grooves": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "bars": { "type": "integer" },
+          "grid": { "type": "string" },
+          "events": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "instrumentId": { "type": "string" },
+                "step": { "type": "integer" },
+                "hit": { "type": "string" },
+                "hands": { "type": "string", "enum": ["RH","LH","RF","LF","both"] }
+              },
+              "required": ["instrumentId","step"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": ["id","bars","grid","events"],
+        "additionalProperties": false
+      }
+    },
+    "arrangement": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "grooveId": { "type": "string" },
+          "repeat": { "type": "integer" },
+          "label": { "type": "string" },
+          "notes": { "type": "string" }
+        },
+        "required": ["grooveId","repeat"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["schemaVersion","meta","kit","colors","grooves","arrangement"],
+  "additionalProperties": false
+}
